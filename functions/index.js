@@ -78,9 +78,6 @@ Your job is to ask the user meaningful follow-up questions based on their previo
 
       res.status(200).send({ question, transcript: transcription, payload });
     } catch (error) {
-
-      res.status(200).send({ question, transcript: transcription, payload });
-    } catch (error) {
       console.error("Error in interviewStep:", error);
       res.set("Access-Control-Allow-Origin", "*");
       res.status(500).send({ error: error.message });
