@@ -12,29 +12,26 @@ const admin = require("firebase-admin");
 const cors = require("cors")({ origin: true }); // Add CORS middleware
 const { OpenAI } = require("openai");
 const { Readable } = require("stream");
-require("dotenv").config(); // Load environment variables
 
 admin.initializeApp();
 const db = admin.firestore();
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // Load secret from .env
+// Use Firebase remote config for the OpenAI API key
+const openai = new OpenAI({ apiKey: functions.config().openai.key });
 
 exports.interviewStep = functions.https.onRequest((req, res) => {
-  // This middleware handles all CORS including OPTIONS
   cors(req, res, async () => {
     try {
-      // Add CORS headers explicitly
       res.set("Access-Control-Allow-Origin", "*");
       res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
       res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-      // Handle preflight OPTIONS request
       if (req.method === "OPTIONS") {
         return res.status(204).send("");
       }
 
-      const uid = req.headers.authorization || null;
-      if (!uid) throw new functions.https.HttpsError("unauthenticated", "Not signed in");
+      // Debugging logs
+      console.log("Request received:", req.body);
 
       const { audioBase64 } = req.body;
       if (!audioBase64) throw new functions.https.HttpsError("invalid-argument", "Missing audio data");
@@ -42,7 +39,6 @@ exports.interviewStep = functions.https.onRequest((req, res) => {
       const buffer = Buffer.from(audioBase64, "base64");
       const audioStream = Readable.from(buffer);
 
-      // Whisper transcription
       const transcription = await openai.audio.transcriptions.create({
         file: audioStream,
         model: "whisper-1",
@@ -71,19 +67,22 @@ Your job is to ask the user meaningful follow-up questions based on their previo
       const [question, payloadText] = response.split("###PAYLOAD###");
       const payload = JSON.parse(payloadText || "{}");
 
-      await db.collection("users").doc(uid).set({
+      await db.collection("users").add({
         profile: payload,
-        rawTranscripts: admin.firestore.FieldValue.arrayUnion({
+        rawTranscripts: {
           transcript: transcription,
           question,
           timestamp: admin.firestore.FieldValue.serverTimestamp()
-        })
-      }, { merge: true });
+        }
+      });
+
+      res.status(200).send({ question, transcript: transcription, payload });
+    } catch (error) {
 
       res.status(200).send({ question, transcript: transcription, payload });
     } catch (error) {
       console.error("Error in interviewStep:", error);
-      res.set("Access-Control-Allow-Origin", "*"); // Ensure CORS headers are set in error responses
+      res.set("Access-Control-Allow-Origin", "*");
       res.status(500).send({ error: error.message });
     }
   });

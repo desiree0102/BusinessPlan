@@ -8,6 +8,10 @@
     ],
     "rewrites": [
       {
+        "source": "/interviewStep",
+        "function": "interviewStep"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
