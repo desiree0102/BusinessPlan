@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Meet ’n Mingle – Login</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth__en.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css" />
+  <link rel="stylesheet" href="firebase-auth-project/src/styles.css">
+  <script src="https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js"></script>
+</head>
+<body>
+  <h1>Welcome to Meet ’n Mingle</h1>
+  <div id="firebaseui-auth-container"></div>
+  <div id="logged-in" style="display:none;">
+    <p>You are logged in!</p>
+    <button onclick="signOut()">Sign out</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA7BQKFgJWOu0c_643mp9w740gTSQ3rAAc",
+      authDomain: "meet--n-mingle.firebaseapp.com",
+      projectId: "meet--n-mingle",
+      storageBucket: "meet--n-mingle.firebasestorage.app",
+      messagingSenderId: "1064150118042",
+      appId: "1:1064150118042:web:f8c32237db53cc9534b923",
+      measurementId: "G-CSG657PWXL"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const uiConfig = {
+      signInFlow: "popup",
+      signInSuccessUrl: "/audio-interview.html",
+      signInOptions: [
+        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID
+      ]
+    };
+
+    const ui = new firebaseui.auth.AuthUI(auth);
+    auth.onAuthStateChanged(user => {
+      const uiContainer = document.getElementById('firebaseui-auth-container');
+      const loggedInContainer = document.getElementById('logged-in');
+
+      if (user) {
+        uiContainer.style.display = 'none';
+        loggedInContainer.style.display = 'block';
+      } else {
+        uiContainer.style.display = 'block';
+        loggedInContainer.style.display = 'none';
+        ui.start('#firebaseui-auth-container', uiConfig);
+      }
+    });
+
+    window.signOut = () => auth.signOut();
+  </script>
+</body>
+</html>
