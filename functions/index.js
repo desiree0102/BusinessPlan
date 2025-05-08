@@ -23,6 +23,16 @@ exports.interviewStep = functions.https.onRequest((req, res) => {
   // This middleware handles all CORS including OPTIONS
   cors(req, res, async () => {
     try {
+      // Add CORS headers explicitly
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+      // Handle preflight OPTIONS request
+      if (req.method === "OPTIONS") {
+        return res.status(204).send("");
+      }
+
       const uid = req.headers.authorization || null;
       if (!uid) throw new functions.https.HttpsError("unauthenticated", "Not signed in");
 
@@ -73,6 +83,7 @@ Your job is to ask the user meaningful follow-up questions based on their previo
       res.status(200).send({ question, transcript: transcription, payload });
     } catch (error) {
       console.error("Error in interviewStep:", error);
+      res.set("Access-Control-Allow-Origin", "*"); // Ensure CORS headers are set in error responses
       res.status(500).send({ error: error.message });
     }
   });
