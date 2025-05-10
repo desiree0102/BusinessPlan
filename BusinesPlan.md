@@ -37,3 +37,13 @@ Premium features:
 - Subscription tiers
 - Event promotion & advertising
 - Commission on ticket sales
+
+## Visual Demo
+
+Here’s a mockup of the user interface:
+
+![App Mockup](./mockup.png)
+*Image will be uploaded soon*
+
+Check out our [project roadmap](./RoadMap.md) for next steps!
+Check out our [business roadmap](https://github.com/desiree0102/BusinessPlan/blob/main/RoadMap.md) to see what's next!
